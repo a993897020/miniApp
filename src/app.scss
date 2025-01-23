@@ -5,3 +5,7 @@ page {
 .nut-uploader-preview-progress {
     visibility: hidden;
 }
+
+.nut-form-item-label {
+    width: var(--nutui-form-item-label-width, 80px) !important;
+}

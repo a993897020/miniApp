@@ -2,7 +2,7 @@
  * @Author: 关振俊
  * @Date: 2025-01-20 16:17:52
  * @LastEditors: 关振俊
- * @LastEditTime: 2025-01-22 17:59:46
+ * @LastEditTime: 2025-01-23 11:41:15
  * @Description:
  */
 import { View } from "@tarojs/components";
@@ -39,7 +39,7 @@ const index: React.FC = () => {
       const url = `${Taro.env.USER_DATA_PATH}/${Date.now() + i}.png`;
       Taro.getFileSystemManager().writeFileSync(
         url,
-        p.url.replace("data:image/png;base64,", ""),
+        p.base64.replace("data:image/png;base64,", ""),
         "base64"
       );
       p.newUrl = url;
@@ -54,7 +54,7 @@ const index: React.FC = () => {
       await waitTime();
       const blogData = Taro.getStorageSync(CacheKey);
       const blog = blogData.find((item: any) => item.id === id);
-      await handleImageShow(blog);
+      // await handleImageShow(blog);
       // console.log({ blog });
       setBlogInfo(blog);
       Taro.hideLoading();
@@ -76,7 +76,7 @@ const index: React.FC = () => {
                   <Image
                     width="80"
                     height="80"
-                    src={item.path}
+                    src={item.url}
                     loading={<Loading className="nut-icon-loading" />}
                     key={idx}
                     style={{ cursor: "pointer" }}

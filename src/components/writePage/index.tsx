@@ -2,7 +2,7 @@
  * @Author: 关振俊
  * @Date: 2025-01-17 16:18:58
  * @LastEditors: 关振俊
- * @LastEditTime: 2025-01-22 14:58:47
+ * @LastEditTime: 2025-01-23 10:46:04
  * @Description:
  */
 import {
@@ -16,7 +16,7 @@ import { View } from "@tarojs/components";
 import Taro, { useLoad } from "@tarojs/taro";
 import { useState } from "react";
 import { CacheKey } from "src/utils/constant";
-import { formatDate, waitTime } from "src/utils/tools";
+import { formatDate, randomId, waitTime } from "src/utils/tools";
 
 /*
  * @Author: 关振俊
@@ -27,6 +27,7 @@ import { formatDate, waitTime } from "src/utils/tools";
  */
 const MAX_TITLE_LENGTH = 10;
 const MAX_CONTENT_LENGTH = 500;
+const MAX_FILE_COUNT = 10;
 
 const WritePage: React.FC = () => {
   const [form] = Form.useForm();
@@ -53,21 +54,21 @@ const WritePage: React.FC = () => {
   // 提交表单
   const submitSucceed = async (values: any) => {
     const recordList = Taro.getStorageSync(CacheKey) || [];
-
-    if (Array.isArray(values.files) && values.files.length > 0) {
-      values.files.forEach((item: any) => {
-        if (!item.url) {
-          const tempFilePath = item.path;
-          item.url = toBase64(tempFilePath);
-        }
-      });
-    }
+    // if (Array.isArray(values.files) && values.files.length > 0) {
+    //   for (let i = 0; i < values.files.length; i++) {
+    //     if (!values.files[i]?.base64) {
+    //       const tempFilePath = values.files[i].path;
+    //       values.files[i].base64 = toBase64(tempFilePath);
+    //     }
+    //   }
+    // }
     if (!id) {
-      values.id = Math.random().toString(36).substr(2, 15);
+      values.id = randomId();
       values.createTime = formatDate(Date.now(), "dateTime");
     } else {
       values.updateTime = formatDate(Date.now(), "dateTime");
     }
+
     Taro.showLoading({
       title: "提交中...",
     });
@@ -89,14 +90,7 @@ const WritePage: React.FC = () => {
       delta: 1,
     });
   };
-  const toBase64 = (tempFilePath: string) => {
-    const fileManager: any = Taro.getFileSystemManager();
-    const arr = Taro.base64ToArrayBuffer(
-      fileManager.readFileSync(tempFilePath, "base64")
-    );
-    const base64Img = "data:image/png;base64," + Taro.arrayBufferToBase64(arr);
-    return base64Img;
-  };
+
   useLoad((opt) => {
     const id = opt.id;
     if (id) {
@@ -151,6 +145,7 @@ const WritePage: React.FC = () => {
         <Form.Item label="附件" name="files">
           <Uploader
             multiple
+            maxCount={MAX_FILE_COUNT}
             beforeUpload={beforeUpload}
             onChange={changeFile}
           />

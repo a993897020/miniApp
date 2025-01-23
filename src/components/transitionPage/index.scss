@@ -1,0 +1,91 @@
+/* src/components/transitionPage/index.scss */
+.container {
+    width: 0;
+    height: 0;
+    background-color: #000;
+    animation: full 3s linear forwards;
+
+    .welcome_text {
+        position: absolute;
+        top: 0%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        color: #fff;
+        font-size: 2rem;
+        font-weight: bold;
+        text-align: center;
+        opacity: 0;
+        color: #333;
+        animation: fadeIn 2s linear forwards 3s;
+    }
+
+    .enter_button {
+        padding: 10px 20px;
+        font-size: 1em;
+        color: #fff;
+        background-color: #007aff;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        animation: btnFadeIn 3s ease-out;
+    }
+
+
+}
+
+@keyframes btnFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeIn {
+    0% {
+        opacity: 0;
+        top: 0;
+    }
+
+
+    100% {
+        opacity: 1;
+        top: 50%;
+    }
+}
+
+@keyframes full {
+    0% {
+        width: 100vw;
+        height: 0px;
+    }
+
+    20% {
+        width: 100vw;
+        height: 20vh;
+    }
+
+    40% {
+        width: 100vw;
+        height: 40vh;
+    }
+
+    60% {
+        width: 100vw;
+        height: 60vh;
+    }
+
+    80% {
+        width: 100vw;
+        height: 80vh;
+    }
+
+    100% {
+        width: 100vw;
+        height: 100vh;
+    }
+}

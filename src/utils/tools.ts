@@ -2,7 +2,7 @@
  * @Author: 关振俊
  * @Date: 2025-01-17 16:02:49
  * @LastEditors: 关振俊
- * @LastEditTime: 2025-01-22 18:00:28
+ * @LastEditTime: 2025-01-23 11:40:46
  * @Description:
  */
 import Taro from "@tarojs/taro";
@@ -55,4 +55,18 @@ export const waitTime = (time: number = 500): Promise<any> => {
       resolve(true);
     }, time);
   });
+};
+/**
+ * 随机id
+ */
+export const randomId = () => {
+  return Math.random().toString(36).substr(2, 9);
+};
+export const toBase64 = (tempFilePath: string) => {
+  const fileManager: any = Taro.getFileSystemManager();
+  const arr = Taro.base64ToArrayBuffer(
+    fileManager.readFileSync(tempFilePath, "base64")
+  );
+  const base64Img = "data:image/png;base64," + Taro.arrayBufferToBase64(arr);
+  return base64Img;
 };

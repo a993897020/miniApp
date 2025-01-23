@@ -9,7 +9,7 @@ import Content from "./components/content";
  * @Author: 关振俊
  * @Date: 2025-01-17 14:42:41
  * @LastEditors: 关振俊
- * @LastEditTime: 2025-01-22 16:03:05
+ * @LastEditTime: 2025-01-23 17:15:53
  * @Description: 首页
  */
 const index: React.FC = () => {
@@ -24,10 +24,7 @@ const index: React.FC = () => {
     query.select("#recordBtn").boundingClientRect();
     query.selectViewport().scrollOffset();
     query.exec(function (res) {
-      const marginGap = 20;
-      const paddingGap = 20 * 2;
-      const wrapH =
-        getContainerHeight() - res[0].height - marginGap - paddingGap;
+      const wrapH = getContainerHeight() - res[0].height - 40 - 50;
       setContainerHeight(wrapH);
     });
   }, []);
@@ -35,16 +32,18 @@ const index: React.FC = () => {
   return (
     <View className="container">
       <Content height={containerHeight}></Content>
-      <Button
-        id="recordBtn"
-        block
-        size="large"
-        type="info"
-        style={{ width: "100%", marginTop: 20 }}
-        onClick={toPage}
-      >
-        记录
-      </Button>
+      <View style={{ padding: 12 }}>
+        <Button
+          id="recordBtn"
+          block
+          size="large"
+          type="info"
+          style={{ width: "100%" }}
+          onClick={toPage}
+        >
+          记录
+        </Button>
+      </View>
     </View>
   );
 };

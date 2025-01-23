@@ -2,7 +2,7 @@
  * @Author: 关振俊
  * @Date: 2025-01-20 11:46:45
  * @LastEditors: 关振俊
- * @LastEditTime: 2025-01-22 18:00:19
+ * @LastEditTime: 2025-01-23 17:11:04
  * @Description:内容区域
  */
 import React, {
@@ -26,7 +26,7 @@ import {
 } from "@nutui/nutui-react-taro";
 import Taro, { useDidShow } from "@tarojs/taro";
 import { CacheKey } from "src/utils/constant";
-import { waitTime } from "src/utils/tools";
+import { randomId, toBase64, waitTime } from "src/utils/tools";
 import { ArrowRight, Del, Edit } from "@nutui/icons-react-taro";
 import { Text } from "@tarojs/components";
 import ExcelJS, { Worksheet } from "exceljs";
@@ -49,16 +49,17 @@ const animateList: string[] = [
 
 const Content = (props: { height: number }) => {
   const [refreshHasMore, setRefreshHasMore] = useState(true);
-  const [showAnimate, setShowAnimate] = useState(true);
+  const [showAnimate, setShowAnimate] = useState(false);
 
   const [list, setList] = useState<blogItem[]>([]);
   const [pageNo, setPageNo] = useState(1);
-  const isLoading = useRef(false);
+  // const isLoading = useRef(false);
   const pageInfo = useRef({
     pageSize: 10,
     total: 0,
     pages: 0,
   });
+  const [isLoading, setIsLoading] = useState(false);
   const allRecord = useRef<blogItem[]>([]);
   const columns = [
     { header: "序号", key: "index", width: 10 },
@@ -72,9 +73,11 @@ const Content = (props: { height: number }) => {
 
   const getData = async (type: "init" | "more") => {
     Taro.showLoading({ title: "加载中..." });
-    isLoading.current = true;
+    // isLoading.current = true;
+    setIsLoading(true);
     await waitTime();
     const recordList: blogItem[] = Taro.getStorageSync(CacheKey) || [];
+    console.log({ recordList });
     allRecord.current = recordList;
     if (type === "init") {
       const newList = recordList
@@ -93,7 +96,8 @@ const Content = (props: { height: number }) => {
       setList(newList);
     }
     Taro.hideLoading();
-    isLoading.current = false;
+    // isLoading.current = false;
+    setIsLoading(false);
     pageInfo.current = {
       pageSize: 10,
       total: recordList.length,
@@ -134,8 +138,9 @@ const Content = (props: { height: number }) => {
         url: `/pages/blogDetail/index?id=${item.id}`,
       });
     }
+    item.swipeRef.current?.close();
     if (type === "del") {
-      Taro.showModal({
+      return Taro.showModal({
         title: "提示",
         content: "确定删除吗？",
         success: async (res) => {
@@ -144,9 +149,10 @@ const Content = (props: { height: number }) => {
             const recordList: blogItem[] = Taro.getStorageSync(CacheKey) || [];
             const newList = recordList.filter((p) => p.id !== item.id);
             Taro.setStorageSync(CacheKey, newList);
-            const idx = list.findIndex((p) => p.id === item.id);
-            list.splice(idx, 1);
-            Taro.setStorageSync(CacheKey, newList);
+
+            list.forEach((p) => {
+              p.swipeRef.current?.close();
+            });
 
             await waitTime();
 
@@ -154,13 +160,13 @@ const Content = (props: { height: number }) => {
               title: "删除成功",
               icon: "success",
             });
+
             await waitTime();
             getData("init");
           }
         },
       });
     }
-    item.swipeRef.current.close();
   };
   //   展示日期
   const showTime = (item: blogItem) => {
@@ -177,34 +183,52 @@ const Content = (props: { height: number }) => {
   };
   // 导入记录
   const importRecord = async () => {
-    const res = await Taro.chooseMessageFile({
-      count: 1,
-      type: "file",
-      extension: ["xlsx"],
-    });
-    console.log({ res });
-    const path = res.tempFiles[0].path;
-    const fs = Taro.getFileSystemManager();
-    const base64 = fs.readFileSync(path, "base64") as string;
-    const buffer = Taro.base64ToArrayBuffer(base64);
-    // console.log({ base64, buffer });
-    const workbook = new ExcelJS.Workbook();
-    await workbook.xlsx.load(buffer);
-    const sheet = workbook.getWorksheet("Sheet1") as Worksheet;
-    const allValues = sheet
-      .getSheetValues()
-      .map((p: string[]) => p.slice(2))
-      .slice(2);
-    const allKey = columns.map((p) => p.key).slice(1);
-
-    const entriesArr = allValues.map((p, pi) => {
-      const entries = p.map((pp, pii) => [
-        allKey[pii],
-        allKey[pii] === "files" ? JSON.parse(pp) : pp,
-      ]);
-      return Object.fromEntries(entries);
-    });
-    Taro.setStorageSync(CacheKey, [...list, ...entriesArr]);
+    try {
+      const res = await Taro.chooseMessageFile({
+        count: 1,
+        type: "file",
+        extension: ["xlsx"],
+      });
+      // console.log({ res });
+      const path = res.tempFiles[0].path;
+      const fs = Taro.getFileSystemManager();
+      const base64 = fs.readFileSync(path, "base64") as string;
+      const buffer = Taro.base64ToArrayBuffer(base64);
+      // console.log({ base64, buffer });
+      const workbook = new ExcelJS.Workbook();
+      await workbook.xlsx.load(buffer);
+      const sheet = workbook.getWorksheet("Sheet1") as Worksheet;
+      const allValues = sheet
+        .getSheetValues()
+        .map((p: string[]) => p.slice(2))
+        .slice(2);
+      // console.log({ allValues });
+      const allKey = columns.map((p) => p.key).slice(1);
+      const entriesArr = allValues.map((p) => {
+        const entries = p.map((pp, pii) => {
+          let formatPP = pp;
+          if (allKey[pii] === "files") {
+            formatPP = pp ? JSON.parse(pp) : [];
+          }
+          if (allKey[pii] === "id") {
+            formatPP = randomId();
+          }
+          return [allKey[pii], formatPP];
+        });
+        return Object.fromEntries(entries);
+      });
+      Taro.setStorageSync(CacheKey, [...list, ...entriesArr]);
+      Taro.showToast({
+        title: "导入成功",
+        icon: "success",
+      });
+      refresh();
+    } catch (err) {
+      Taro.showToast({
+        title: "导入失败",
+        icon: "error",
+      });
+    }
     // console.log({ allValues, allKey });
 
     // console.log({ entriesArr });
@@ -218,18 +242,35 @@ const Content = (props: { height: number }) => {
     const resList = allRecord.current.map((p, pi) => ({
       ...p,
       index: pi + 1,
-      files: JSON.stringify(p.files),
+      files: p.files ? JSON.stringify(p.files) : "",
     }));
 
     const sheet = workbook.addWorksheet("Sheet1");
     sheet.columns = columns;
     sheet.addRows(resList);
+    if (allRecord.current.length > 0) {
+      allRecord.current.forEach((p, pi) => {
+        if (Array.isArray(p.files) && p.files.length > 0) {
+          p.files.forEach((pp, ppi) => {
+            const base64 = toBase64(pp.path);
+            const imageId = workbook.addImage({
+              base64: base64,
+              extension: "png",
+            });
+            sheet.addImage(imageId, {
+              tl: { col: columns.length + ppi, row: pi + 1 },
+              ext: { width: 20, height: 20 },
+            });
+          });
+        }
+      });
+    }
 
     workbook.xlsx.writeBuffer().then((buffer) => {
       // console.log({ buffer });
       const base64 = Taro.arrayBufferToBase64(buffer);
       // console.log({ base64 });
-      const url = Taro.env.USER_DATA_PATH + "/test.xlsx";
+      const url = Taro.env.USER_DATA_PATH + "/记录.xlsx";
       Taro.getFileSystemManager().writeFile({
         filePath: url,
         data: base64,
@@ -279,7 +320,10 @@ const Content = (props: { height: number }) => {
           gap: "8px",
           ...style,
         }}
-        onClick={() => clickItem()}
+        onClick={(e: any) => {
+          e.stopPropagation();
+          clickItem();
+        }}
       >
         {icon}
         <>{text}</>
@@ -289,47 +333,48 @@ const Content = (props: { height: number }) => {
 
   return (
     <>
+      <Space
+        style={{
+          marginBlock: 12,
+          justifyContent: "flex-end",
+          alignItems: "center",
+          height: 40,
+        }}
+        className="padding_wrap"
+      >
+        <Button type="info" onClick={() => importRecord()}>
+          导入
+        </Button>
+        <Button type="info" onClick={() => exportRecord()}>
+          导出
+        </Button>
+        <Text>动画</Text>
+        <Switch
+          onChange={setShowAnimate}
+          checked={showAnimate}
+          style={
+            {
+              "--nutui-switch-open-background-color": "#4969f2",
+              "--nutui-switch-close-line-background-color": "#ebebeb",
+            } as React.CSSProperties
+          }
+        />
+      </Space>
       <ul
         id="refreshScroll"
-        style={Object.assign({}, InfiniteUlStyle, { height: props.height })}
+        style={{ ...InfiniteUlStyle, height: props.height }}
       >
-        {list.length > 0 ? (
-          <InfiniteLoading
-            target="refreshScroll"
-            pullRefresh
-            loadingText={<Loading>加载中</Loading>}
-            hasMore={refreshHasMore}
-            onLoadMore={refreshLoadMore}
-            onRefresh={refresh}
-          >
-            <Space
-              style={{
-                marginBottom: 20,
-                justifyContent: "flex-end",
-                alignItems: "center",
-              }}
-            >
-              <Button type="info" onClick={() => importRecord()}>
-                导入
-              </Button>
-              <Button type="info" onClick={() => exportRecord()}>
-                导出
-              </Button>
-              <Text>动画</Text>
-              <Switch
-                onChange={setShowAnimate}
-                checked={showAnimate}
-                style={
-                  {
-                    "--nutui-switch-open-background-color": "#4969f2",
-                    "--nutui-switch-close-line-background-color": "#ebebeb",
-                  } as React.CSSProperties
-                }
-              />
-            </Space>
-
-            <Space style={{ width: "100%" }} direction="vertical">
-              {list.map((item: blogItem, index) => {
+        <InfiniteLoading
+          target="refreshScroll"
+          pullRefresh
+          loadingText={<Loading>加载中</Loading>}
+          hasMore={refreshHasMore}
+          onLoadMore={refreshLoadMore}
+          onRefresh={refresh}
+        >
+          <Space className="list_wrap padding_wrap" direction="vertical">
+            {list.length > 0 ? (
+              list.map((item: blogItem, index) => {
                 return (
                   <React.Fragment key={index}>
                     <Animate type={createAnimateType()} loop>
@@ -372,12 +417,12 @@ const Content = (props: { height: number }) => {
                     </Animate>
                   </React.Fragment>
                 );
-              })}
-            </Space>
-          </InfiniteLoading>
-        ) : (
-          <Empty description="暂无数据" />
-        )}
+              })
+            ) : (
+              <Empty description="暂无数据" />
+            )}
+          </Space>
+        </InfiniteLoading>
       </ul>
     </>
   );

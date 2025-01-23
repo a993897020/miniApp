@@ -1,5 +1,5 @@
 .container {
-    padding: 20px;
+    // padding: 20px;
 
     .nut-cell-extra {
         align-self: center;
@@ -12,5 +12,16 @@
             display: flex;
             font-size: 12px;
         }
+    }
+
+    .list_wrap {
+        width: 100%;
+        // overflow: auto;
+        // padding: 12px;
+    }
+
+    .padding_wrap {
+        padding-inline: 12px;
+        box-sizing: border-box;
     }
 }
