@@ -1,0 +1,16 @@
+.container {
+    padding: 20px;
+
+    .nut-cell-extra {
+        align-self: center;
+    }
+
+    .swipe_wrap {
+
+        .swipe_right {
+            height: inherit;
+            display: flex;
+            font-size: 12px;
+        }
+    }
+}

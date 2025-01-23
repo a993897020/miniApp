@@ -1,0 +1,44 @@
+{
+    "list": [
+        {
+            "name": "微信小程序",
+            "value": "weapp",
+            "useCount": 25
+        },
+        {
+            "name": "h5",
+            "value": "h5",
+            "useCount": 7
+        },
+        {
+            "name": "React Native",
+            "value": "rn",
+            "useCount": 1
+        },
+        {
+            "name": "百度小程序",
+            "value": "swan",
+            "useCount": 0
+        },
+        {
+            "name": "支付宝小程序",
+            "value": "alipay",
+            "useCount": 0
+        },
+        {
+            "name": "字节跳动小程序",
+            "value": "tt",
+            "useCount": 0
+        },
+        {
+            "name": "qq小程序",
+            "value": "qq",
+            "useCount": 0
+        },
+        {
+            "name": "京东小程序",
+            "value": "jd",
+            "useCount": 0
+        }
+    ]
+}
