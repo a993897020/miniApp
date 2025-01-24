@@ -1,9 +1,7 @@
 .container {
     // padding: 20px;
 
-    .nut-cell-extra {
-        align-self: center;
-    }
+
 
     .swipe_wrap {
 
@@ -16,8 +14,32 @@
 
     .list_wrap {
         width: 100%;
+
         // overflow: auto;
         // padding: 12px;
+        .list_item {
+            width: 100%;
+            display: flex;
+            align-items: center;
+
+            .nut-cell-title {
+                width: 300px;
+            }
+
+            .nut-cell-extra {
+                align-self: center;
+                flex: 0 0 20px;
+            }
+
+
+            .nut-checkbox {
+                margin-right: 10px;
+            }
+
+            .nut-animate {
+                width: 100%;
+            }
+        }
     }
 
     .padding_wrap {

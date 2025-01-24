@@ -2,7 +2,7 @@
  * @Author: 关振俊
  * @Date: 2025-01-17 16:18:58
  * @LastEditors: 关振俊
- * @LastEditTime: 2025-01-23 10:46:04
+ * @LastEditTime: 2025-01-24 15:51:49
  * @Description:
  */
 import {
@@ -25,7 +25,7 @@ import { formatDate, randomId, waitTime } from "src/utils/tools";
  * @LastEditTime: 2025-01-17 16:33:46
  * @Description:编写记录
  */
-const MAX_TITLE_LENGTH = 10;
+const MAX_TITLE_LENGTH = 30;
 const MAX_CONTENT_LENGTH = 500;
 const MAX_FILE_COUNT = 10;
 
@@ -54,14 +54,15 @@ const WritePage: React.FC = () => {
   // 提交表单
   const submitSucceed = async (values: any) => {
     const recordList = Taro.getStorageSync(CacheKey) || [];
-    // if (Array.isArray(values.files) && values.files.length > 0) {
-    //   for (let i = 0; i < values.files.length; i++) {
-    //     if (!values.files[i]?.base64) {
-    //       const tempFilePath = values.files[i].path;
-    //       values.files[i].base64 = toBase64(tempFilePath);
-    //     }
-    //   }
-    // }
+    if (Array.isArray(values.files) && values.files.length > 0) {
+      values.files = values.files.map((file: any) => ({
+        uid: file.uid,
+        name: file.name,
+        path: file.path,
+        type: file.type,
+        url: file.url,
+      }));
+    }
     if (!id) {
       values.id = randomId();
       values.createTime = formatDate(Date.now(), "dateTime");

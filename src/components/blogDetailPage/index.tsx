@@ -2,23 +2,17 @@
  * @Author: 关振俊
  * @Date: 2025-01-20 16:17:52
  * @LastEditors: 关振俊
- * @LastEditTime: 2025-01-23 11:41:15
+ * @LastEditTime: 2025-01-24 15:41:37
  * @Description:
  */
-import { View } from "@tarojs/components";
+import { View, Image } from "@tarojs/components";
 import "./index.scss";
 import { useLoad } from "@tarojs/taro";
 import Taro from "@tarojs/taro";
 import { CacheKey } from "src/utils/constant";
 import { useState } from "react";
 import { waitTime } from "src/utils/tools";
-import {
-  Space,
-  Image,
-  Loading,
-  ImagePreview,
-  BackTop,
-} from "@nutui/nutui-react-taro";
+import { Space, ImagePreview, BackTop } from "@nutui/nutui-react-taro";
 /*
  * @Author: 关振俊
  * @Date: 2025-01-20 16:17:53
@@ -70,16 +64,17 @@ const index: React.FC = () => {
         <View className="blog_content">{blogInfo.content}</View>
         {blogInfo.files && (
           <View className="blog_imgs">
-            <Space>
+            <Space wrap>
               {blogInfo.files.map((item: any, idx: number) => {
                 return (
                   <Image
-                    width="80"
-                    height="80"
                     src={item.url}
-                    loading={<Loading className="nut-icon-loading" />}
                     key={idx}
-                    style={{ cursor: "pointer" }}
+                    mode="widthFix"
+                    style={{
+                      cursor: "pointer",
+                      width: "100px",
+                    }}
                     onClick={() => {
                       setShowPreview(true);
                       setPreviewImg(item.url);
